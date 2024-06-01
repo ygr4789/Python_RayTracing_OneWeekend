@@ -4,18 +4,33 @@ from tqdm import tqdm
 from hittable import *
 from interval import *
 
+def _linear_to_gamma(linear_component: float) -> float:
+    if linear_component > 0: return math.sqrt(linear_component)
+    else: return 0
+
 def _write_color(target: list, c: Color) -> None:
+    r = _linear_to_gamma(c.x)
+    g = _linear_to_gamma(c.y)
+    b = _linear_to_gamma(c.z)
+    
     intensity = Interval(0, 0.999)
-    r = int(256 * intensity.clamp(c.x))
-    g = int(256 * intensity.clamp(c.y))
-    b = int(256 * intensity.clamp(c.z))
+    r = int(256 * intensity.clamp(r))
+    g = int(256 * intensity.clamp(g))
+    b = int(256 * intensity.clamp(b))
     target.extend([r, g, b])
 
 class Camera:
-    def __init__(self, aspect_ratio:float = 1.0, image_width:int = 100, samples_per_pixel:int = 1) -> None:
+    def __init__(
+        self, 
+        aspect_ratio:float = 1.0, 
+        image_width:int = 100, 
+        samples_per_pixel:int = 10,
+        max_depth:int = 1,
+    ) -> None:
         self.aspect_ratio = aspect_ratio
         self.image_width = image_width
         self.samples_per_pixel = samples_per_pixel
+        self.max_depth = max_depth
         
         self.__image_height: int
         self.__center: Point3
@@ -32,7 +47,7 @@ class Camera:
                 pixel_color = Color(0, 0, 0)
                 for _ in range(self.samples_per_pixel):
                     r = self.__get_ray(u, v)
-                    pixel_color += self.__ray_color(r, world)
+                    pixel_color += self.__ray_color(r, self.max_depth, world)
                 pixel_color /= self.samples_per_pixel
                 _write_color(target, pixel_color)
                 pbar.update(1)
@@ -71,12 +86,14 @@ class Camera:
     def __sample_square(self) -> Vec3:
         return Vec3(random.random() - 0.5, random.random() - 0.5, 0)
     
-    def __ray_color(self, r:Ray, world:Hittable) -> Color:
-        # Convert normal to color
-        if rec := world.hit(r, Interval(0, math.inf)):
-            return (rec.normal + Color(1,1,1)) * 0.5
+    def __ray_color(self, r:Ray, depth:int, world:Hittable) -> Color:
+        if depth <= 0:
+            return Color(0, 0, 0)
+        
+        if rec := world.hit(r, Interval(0.001, math.inf)):
+            direction = rec.normal.rand_on_hemisphere()
+            return self.__ray_color(Ray(rec.p, direction), depth-1, world) * 0.5
     
-        # Default background
         unit_direction = r.dir.normalize()
         a = (unit_direction.y + 1.0) * 0.5
         return Color(1.0, 1.0, 1.0) * (1.0-a) + Color(0.5, 0.7, 1.0) * a

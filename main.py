@@ -12,7 +12,7 @@ def main():
     world.add(Sphere(Point3(0,0,-1), 0.5))
     world.add(Sphere(Point3(0,-100.5,-1), 100))
 
-    cam = Camera(16.0 / 9.0, 400, 100)
+    cam = Camera(16.0 / 9.0, 400, 100, 50)
     cam.render(world, color_array)
             
     numpy_array = np.array(color_array, dtype=np.uint8)
