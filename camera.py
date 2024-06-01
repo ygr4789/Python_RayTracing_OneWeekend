@@ -91,8 +91,10 @@ class Camera:
             return Color(0, 0, 0)
         
         if rec := world.hit(r, Interval(0.001, math.inf)):
-            direction = rec.normal.rand_on_hemisphere()
-            return self.__ray_color(Ray(rec.p, direction), depth-1, world) * 0.5
+            attenuation, scattered = rec.mat.scatter(r, rec)
+            if scattered:
+                return attenuation * self.__ray_color(scattered, depth-1, world)
+            return Color(0, 0, 0)
     
         unit_direction = r.dir.normalize()
         a = (unit_direction.y + 1.0) * 0.5

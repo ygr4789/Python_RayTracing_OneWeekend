@@ -72,8 +72,20 @@ class Vec3:
     def __sub__(self, other: Vec3) -> Vec3:
         return Vec3(self.x - other.x, self.y - other.y, self.z - other.z)
 
-    def __mul__(self, scalar: float) -> Vec3:
-        return Vec3(self.x * scalar, self.y * scalar, self.z * scalar)
+    @_typing.overload
+    def __mul__(self, other: Vec3) -> Vec3:
+        ...
+        
+    @_typing.overload
+    def __mul__(self, other: float) -> float:
+        ...
+        
+    def __mul__(self, other):
+        if isinstance(other, Vec3):
+            return Vec3(self.x * other.x, self.y * other.y, self.z * other.z)
+        else:
+            scalar = other
+            return Vec3(self.x * scalar, self.y * scalar, self.z * scalar)
 
     def __truediv__(self, scalar: float) -> Vec3:
         return Vec3(self.x / scalar, self.y / scalar, self.z / scalar)
@@ -156,20 +168,27 @@ class Vec3:
                     _clamp(self.y, min_val, max_val),
                     _clamp(self.z, min_val, max_val))
     
+    def rand_unit_vector() -> Vec3:
+        z1 = _random.uniform(0, 1)
+        z2 = _random.uniform(0, 1)
+        th = _math.acos(1 - z1)
+        pi = 2 * _math.pi * z2
+        x = _math.cos(pi) * _math.sin(th)
+        y = _math.sin(pi) * _math.sin(th)
+        z = _math.cos(th)
+        return Vec3(x, y, z)
+        
     def rand_on_hemisphere(self) -> Vec3:
-        def rand_unit_vector() -> Vec3:
-            z1 = _random.uniform(0, 1)
-            z2 = _random.uniform(0, 1)
-            th = _math.acos(1 - z1)
-            pi = 2 * _math.pi * z2
-            x = _math.cos(pi) * _math.sin(th)
-            y = _math.sin(pi) * _math.sin(th)
-            z = _math.cos(th)
-            return Vec3(x, y, z)
-            
-        on_unit_sphere = rand_unit_vector()
+        on_unit_sphere = self.rand_unit_vector()
         if on_unit_sphere.dot(self) > 0.0: return on_unit_sphere
         else: return -on_unit_sphere
+        
+    def near_zero(self) -> bool:
+        s = 1e-8
+        return abs(self.x) < s and abs(self.y) < s and abs(self.z) < s
+        
+    def reflect(self, n: Vec3) -> Vec3:
+        return self - n * 2 * self.dot(n)
     
     def __getattr__(self, attrs: str) -> list:
         try:

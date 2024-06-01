@@ -1,12 +1,14 @@
 import math
 
 from hittable import *
+from material import Material
 
 class Sphere(Hittable):
-    def __init__(self, center: Point3, radius: float) -> None:
+    def __init__(self, center: Point3, radius: float, mat: Material) -> None:
         super().__init__()
-        self.center: Point3 = center
-        self.radius: float = max(0.0, radius)
+        self.center = center
+        self.radius = max(0.0, radius)
+        self.mat = mat
         
     def hit(self, r: Ray, ray_t: Interval) -> HitRecord:
         oc = self.center - r.orig
@@ -31,5 +33,6 @@ class Sphere(Hittable):
         rec.p = r.at(rec.t)
         outward_normal = (rec.p - self.center) / self.radius
         rec.set_face_normal(r, outward_normal)
+        rec.mat = self.mat
         
         return rec

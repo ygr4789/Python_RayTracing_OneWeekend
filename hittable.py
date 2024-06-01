@@ -1,5 +1,10 @@
+from typing import TYPE_CHECKING
+
 from ray import *
 from interval import *
+
+if TYPE_CHECKING:
+    from material import Material
 
 class HitRecord:
     def __init__(self) -> None:
@@ -7,6 +12,7 @@ class HitRecord:
         self.normal: Vec3
         self.t: float
         self.front_face: bool
+        self.mat: Material
         
     def set_face_normal(self, r: Ray, outward_normal: Vec3) -> None:
         """
