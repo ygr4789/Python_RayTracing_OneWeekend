@@ -77,7 +77,7 @@ class Vec3:
         ...
         
     @_typing.overload
-    def __mul__(self, other: float) -> float:
+    def __mul__(self, other: float) -> Vec3:
         ...
         
     def __mul__(self, other):
@@ -189,6 +189,12 @@ class Vec3:
         
     def reflect(self, n: Vec3) -> Vec3:
         return self - n * 2 * self.dot(n)
+    
+    def refract(self, n: Vec3, etai_over_etat: float) -> Vec3:
+        cos_theta = min(-self.dot(n), 1)
+        r_out_perp =  (self + n * cos_theta) * etai_over_etat
+        r_out_parallel = n * -_math.sqrt(abs(1.0 - r_out_perp.mag_sq))
+        return r_out_perp + r_out_parallel
     
     def __getattr__(self, attrs: str) -> list:
         try:

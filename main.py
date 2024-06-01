@@ -11,16 +11,18 @@ def main():
 
     material_ground = Lambertian(Color(0.8, 0.8, 0.0))
     material_center = Lambertian(Color(0.1, 0.2, 0.5))
-    material_left = Metal(Color(0.8, 0.8, 0.8), 0.3)
+    material_left = Dielectric(1.5)
+    material_bubble = Dielectric(1 / 1.5)
     material_right = Metal(Color(0.8, 0.6, 0.2), 1.0)
 
     world = HittableList()
     world.add(Sphere(Point3(  0.0, -100.5, -1.0), 100, material_ground))
     world.add(Sphere(Point3(  0.0,    0.0, -1.2), 0.5, material_center))
     world.add(Sphere(Point3( -1.0,    0.0, -1.0), 0.5, material_left))
+    world.add(Sphere(Point3( -1.0,    0.0, -1.0), 0.4, material_bubble))
     world.add(Sphere(Point3(  1.0,    0.0, -1.0), 0.5, material_right))
 
-    # cam = Camera(16.0 / 9.0, 100, 20, 5)
+    # cam = Camera(16.0 / 9.0, 100, 20, 10)
     cam = Camera(16.0 / 9.0, 400, 100, 50)
     cam.render(world, color_array)
             
