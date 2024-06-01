@@ -159,13 +159,3 @@ class Vec3:
 
 Point3 = Vec3
 Color = Vec3
-
-# class Point3(Vec3):
-#     pass
-
-# class Color(Vec3):
-#     def byte(self):
-#         r = int(255.999 * self.x)
-#         g = int(255.999 * self.y)
-#         b = int(255.999 * self.z)
-#         return [r, g, b]

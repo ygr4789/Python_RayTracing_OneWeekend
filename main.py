@@ -3,16 +3,27 @@ from PIL import Image
 from vec3 import Vec3, Point3, Color
 from ray import Ray
 
-def ray_color(r: Ray):
+def ray_color(r: Ray) -> Color:
+    if hit_sphere(Point3(0,0,-1), 0.5, r):
+        return Color(1, 0, 0)
+    
     unit_direction = r.dir.normalize()
     a = (unit_direction.y + 1.0) * 0.5
     return Color(1.0, 1.0, 1.0) * (1.0-a) + Color(0.5, 0.7, 1.0) * a
 
-def write_color(arr: list, c: Color):
+def write_color(arr: list, c: Color) -> None:
     r = int(255.999 * c.x)
     g = int(255.999 * c.y)
     b = int(255.999 * c.z)
     arr.extend([r, g, b])
+
+def hit_sphere(center: Point3, radius: float, r: Ray) -> bool:
+    oc = center - r.orig
+    a = r.dir.dot(r.dir)
+    b = -2.0 * r.dir.dot(oc)
+    c = oc.dot(oc) - radius*radius
+    discriminant = b*b - 4*a*c
+    return (discriminant >= 0)
 
 def main():
     aspect_ratio = 16.0 / 9.0
