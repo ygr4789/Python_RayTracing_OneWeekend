@@ -54,6 +54,16 @@ class Vec3:
         :type: float
         """
         return self.__abs__()
+    
+    @property
+    def mag_sq(self) -> float:
+        """Squared magnitude, or length of the vector.
+        
+        Alias of self.dot(self).
+        
+        :type: float
+        """
+        return self.dot(self)
 
     def __add__(self, other: Vec3) -> Vec3:
         return Vec3(self.x + other.x, self.y + other.y, self.z + other.z)

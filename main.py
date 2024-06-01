@@ -1,11 +1,14 @@
 import numpy as np
+import math
 from PIL import Image
-from vec3 import Vec3, Point3, Color
-from ray import Ray
 
-def ray_color(r: Ray) -> Color:
-    if hit_sphere(Point3(0,0,-1), 0.5, r):
-        return Color(1, 0, 0)
+from ray import *
+from hittable_list import *
+from sphere import *
+
+def ray_color(r: Ray, world: HittableList) -> Color:
+    if rec := world.hit(r, 0, math.inf):
+        return (rec.normal + Color(1,1,1)) * 0.5
     
     unit_direction = r.dir.normalize()
     a = (unit_direction.y + 1.0) * 0.5
@@ -17,20 +20,17 @@ def write_color(arr: list, c: Color) -> None:
     b = int(255.999 * c.z)
     arr.extend([r, g, b])
 
-def hit_sphere(center: Point3, radius: float, r: Ray) -> bool:
-    oc = center - r.orig
-    a = r.dir.dot(r.dir)
-    b = -2.0 * r.dir.dot(oc)
-    c = oc.dot(oc) - radius*radius
-    discriminant = b*b - 4*a*c
-    return (discriminant >= 0)
-
 def main():
     aspect_ratio = 16.0 / 9.0
 
     # Calculate the image height
     image_width = int(400)
     image_height = int(image_width / aspect_ratio)
+
+    # World
+    world = HittableList()
+    world.add(Sphere(Point3(0,0,-1), 0.5))
+    world.add(Sphere(Point3(0,-100.5,-1), 100))
 
     # Camera
     focal_length = 1.0
@@ -58,7 +58,7 @@ def main():
             ray_direction = pixel_center - camera_center
             r = Ray(camera_center, ray_direction)
             
-            pixel_color = ray_color(r)
+            pixel_color = ray_color(r, world)
             write_color(color_array, pixel_color)
             
     assert len(color_array) == image_width * image_height * 3
