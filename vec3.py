@@ -183,6 +183,12 @@ class Vec3:
         if on_unit_sphere.dot(self) > 0.0: return on_unit_sphere
         else: return -on_unit_sphere
         
+    def rand_in_unit_disk() -> Vec3:
+        while True:
+            p = Vec3(_random.uniform(-1,1), _random.uniform(-1,1), 0)
+            if p.mag_sq < 1:
+                return p
+        
     def near_zero(self) -> bool:
         s = 1e-8
         return abs(self.x) < s and abs(self.y) < s and abs(self.z) < s

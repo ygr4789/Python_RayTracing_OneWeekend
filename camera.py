@@ -38,11 +38,17 @@ class Camera:
         self.lookat = Point3(0,0,-1)
         self.vup = Vec3(0,1,0)
         
+        self.defocus_angle: float = 0.0
+        self.focus_dist: float = 10.0
+        
         self.__image_height: int
         self.__center: Point3
         self.__pixel00_loc: Point3
         self.__pixel_delta_u: Vec3
         self.__pixel_delta_v: Vec3
+        
+        self.__defocus_disk_u: Vec3
+        self.__defocus_disk_v: Vec3
     
     def render(self, world:Hittable, target:list) -> None:
         self.__initialize()
@@ -64,10 +70,9 @@ class Camera:
         
         center = self.lookfrom
         
-        focal_length = (self.lookfrom - self.lookat).mag
         theta = math.radians(self.vfov)
         h = math.tan(theta/2)
-        viewport_height = 2 * h * focal_length
+        viewport_height = 2 * h * self.focus_dist
         viewport_width = viewport_height * (image_width/image_height)
 
         w = (self.lookfrom - self.lookat).normalize()
@@ -80,7 +85,7 @@ class Camera:
         pixel_delta_u = viewport_u / image_width
         pixel_delta_v = viewport_v / image_height
 
-        viewport_upper_left = center - (w * focal_length) - viewport_u/2 - viewport_v/2
+        viewport_upper_left = center - (w * self.focus_dist) - viewport_u/2 - viewport_v/2
         pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5
         
         self.__image_height = image_height
@@ -88,16 +93,24 @@ class Camera:
         self.__pixel_delta_u = pixel_delta_u
         self.__pixel_delta_v = pixel_delta_v
         self.__pixel00_loc = pixel00_loc
+        
+        defocus_radius = self.focus_dist * math.tan(math.radians(self.defocus_angle / 2))
+        self.__defocus_disk_u = u * defocus_radius
+        self.__defocus_disk_v = v * defocus_radius
     
     def __get_ray(self, u:int, v:int) -> Ray:
         offset = self.__sample_square()
         pixel_sample = self.__pixel00_loc + (self.__pixel_delta_u * (u + offset.x)) + (self.__pixel_delta_v * (v + offset.y))
-        ray_origin = self.__center
+        ray_origin = self.__center if self.defocus_angle <= 0 else self.__defocus_disk_sample()
         ray_direction = pixel_sample - ray_origin
         return Ray(ray_origin, ray_direction)
         
     def __sample_square(self) -> Vec3:
         return Vec3(random.random() - 0.5, random.random() - 0.5, 0)
+        
+    def __defocus_disk_sample(self) -> Point3:
+        p = Vec3.rand_in_unit_disk()
+        return self.__center + self.__defocus_disk_u * p.x + self.__defocus_disk_v * p.y
     
     def __ray_color(self, r:Ray, depth:int, world:Hittable) -> Color:
         if depth <= 0:

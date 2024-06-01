@@ -29,6 +29,9 @@ def main():
     cam.vup = Vec3(0,1,0)
     cam.vfov = 20
     
+    cam.defocus_angle = 10.0
+    cam.focus_dist = 3.4
+    
     cam.render(world, color_array)
             
     numpy_array = np.array(color_array, dtype=np.uint8)
