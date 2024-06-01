@@ -7,7 +7,7 @@ from hittable_list import *
 from sphere import *
 
 def ray_color(r: Ray, world: HittableList) -> Color:
-    if rec := world.hit(r, 0, math.inf):
+    if rec := world.hit(r, Interval(0, math.inf)):
         return (rec.normal + Color(1,1,1)) * 0.5
     
     unit_direction = r.dir.normalize()

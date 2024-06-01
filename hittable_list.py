@@ -13,12 +13,12 @@ class HittableList(Hittable):
     def add(self, object: Hittable):
         self.objects.append(object)
 
-    def hit(self, r: Ray, ray_tmin: float, ray_tmax: float) -> HitRecord:
+    def hit(self, r: Ray, ray_t: Interval) -> HitRecord:
         rec = None
-        closest_so_far = ray_tmax
+        closest_so_far = ray_t.max
 
         for object in self.objects:
-            if tmp_rec := object.hit(r, ray_tmin, closest_so_far):
+            if tmp_rec := object.hit(r, Interval(ray_t.min, closest_so_far)):
                 rec = tmp_rec
                 closest_so_far = rec.t
 

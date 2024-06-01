@@ -1,4 +1,5 @@
 from ray import *
+from interval import *
 
 class HitRecord:
     def __init__(self) -> None:
@@ -17,5 +18,5 @@ class HitRecord:
         self.normal = outward_normal if self.front_face else -outward_normal
 
 class Hittable:
-    def hit(self, r: Ray, ray_tmin: float, ray_tmax: float) -> HitRecord:
+    def hit(self, r: Ray, ray_t: Interval) -> HitRecord:
         raise NotImplementedError()
