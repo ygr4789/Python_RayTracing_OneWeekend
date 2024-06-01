@@ -26,11 +26,17 @@ class Camera:
         image_width:int = 100, 
         samples_per_pixel:int = 10,
         max_depth:int = 1,
+        vfov:float = 90
     ) -> None:
         self.aspect_ratio = aspect_ratio
         self.image_width = image_width
         self.samples_per_pixel = samples_per_pixel
         self.max_depth = max_depth
+        self.vfov = vfov
+        
+        self.lookfrom = Point3(0,0,0)
+        self.lookat = Point3(0,0,-1)
+        self.vup = Vec3(0,1,0)
         
         self.__image_height: int
         self.__center: Point3
@@ -56,18 +62,25 @@ class Camera:
         image_width = self.image_width
         image_height = int(image_width / self.aspect_ratio)
         
-        focal_length = 1.0
-        viewport_height = 2.0
+        center = self.lookfrom
+        
+        focal_length = (self.lookfrom - self.lookat).mag
+        theta = math.radians(self.vfov)
+        h = math.tan(theta/2)
+        viewport_height = 2 * h * focal_length
         viewport_width = viewport_height * (image_width/image_height)
-        center = Point3(0, 0, 0)
 
-        viewport_u = Vec3(viewport_width, 0, 0)
-        viewport_v = Vec3(0, -viewport_height, 0)
+        w = (self.lookfrom - self.lookat).normalize()
+        u = self.vup.cross(w).normalize()
+        v = w.cross(u)
+
+        viewport_u = u * viewport_width
+        viewport_v = -v * viewport_height
 
         pixel_delta_u = viewport_u / image_width
         pixel_delta_v = viewport_v / image_height
 
-        viewport_upper_left = center - Vec3(0, 0, focal_length) - viewport_u/2 - viewport_v/2
+        viewport_upper_left = center - (w * focal_length) - viewport_u/2 - viewport_v/2
         pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5
         
         self.__image_height = image_height

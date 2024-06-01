@@ -24,6 +24,11 @@ def main():
 
     # cam = Camera(16.0 / 9.0, 100, 20, 10)
     cam = Camera(16.0 / 9.0, 400, 100, 50)
+    cam.lookfrom = Point3(-2,2,1)
+    cam.lookat = Point3(0,0,-1)
+    cam.vup = Vec3(0,1,0)
+    cam.vfov = 20
+    
     cam.render(world, color_array)
             
     numpy_array = np.array(color_array, dtype=np.uint8)
