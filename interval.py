@@ -9,11 +9,14 @@ class Interval:
     def size(self):
         return self.max - self.min
     
-    def contains(self, x: float) -> bool:
+    def contains(self, x:float) -> bool:
         return self.min <= x <= self.max
     
-    def surrounds(self, x: float) -> bool:
+    def surrounds(self, x:float) -> bool:
         return self.min < x < self.max
+    
+    def clamp(self, x:float) -> float:
+        return max(min(x, self.max), self.min)
 
 empty = Interval(math.inf, -math.inf)
 universe = Interval(-math.inf, math.inf)

@@ -6,7 +6,7 @@ import typing as _typing
 from collections.abc import Iterator as _Iterator
 
 
-def clamp(num: float, min_val: float, max_val: float) -> float:
+def _clamp(num: float, min_val: float, max_val: float) -> float:
     return max(min(num, max_val), min_val)
 
 class Vec3:
@@ -151,9 +151,9 @@ class Vec3:
 
     def clamp(self, min_val: float, max_val: float) -> Vec3:
         """Restrict the value of the X, Y and Z components of the vector to be within the given values."""
-        return Vec3(clamp(self.x, min_val, max_val),
-                    clamp(self.y, min_val, max_val),
-                    clamp(self.z, min_val, max_val))
+        return Vec3(_clamp(self.x, min_val, max_val),
+                    _clamp(self.y, min_val, max_val),
+                    _clamp(self.z, min_val, max_val))
 
     def __getattr__(self, attrs: str) -> list:
         try:

@@ -1,33 +1,41 @@
+import random
+from tqdm import tqdm
+
 from hittable import *
+from interval import *
 
 def _write_color(target: list, c: Color) -> None:
-    r = int(255.999 * c.x)
-    g = int(255.999 * c.y)
-    b = int(255.999 * c.z)
+    intensity = Interval(0, 0.999)
+    r = int(256 * intensity.clamp(c.x))
+    g = int(256 * intensity.clamp(c.y))
+    b = int(256 * intensity.clamp(c.z))
     target.extend([r, g, b])
 
 class Camera:
-    def __init__(self, aspect_ratio:float = 1.0, image_width:int = 100) -> None:
+    def __init__(self, aspect_ratio:float = 1.0, image_width:int = 100, samples_per_pixel:int = 1) -> None:
         self.aspect_ratio = aspect_ratio
         self.image_width = image_width
+        self.samples_per_pixel = samples_per_pixel
         
         self.__image_height: int
         self.__center: Point3
-        self.__pixel_delta_u: float
-        self.__pixel_delta_v: float
         self.__pixel00_loc: Point3
+        self.__pixel_delta_u: Vec3
+        self.__pixel_delta_v: Vec3
     
     def render(self, world:Hittable, target:list) -> None:
         self.__initialize()
+        pbar = tqdm(total=self.__image_height*self.image_width)
         
         for v in range(self.__image_height):
             for u in range(self.image_width):
-                pixel_center = self.__pixel00_loc + (self.__pixel_delta_u * u) + (self.__pixel_delta_v * v)
-                ray_direction = pixel_center - self.__center
-                r = Ray(self.__center, ray_direction)
-                
-                pixel_color = self.__ray_color(r, world)
+                pixel_color = Color(0, 0, 0)
+                for _ in range(self.samples_per_pixel):
+                    r = self.__get_ray(u, v)
+                    pixel_color += self.__ray_color(r, world)
+                pixel_color /= self.samples_per_pixel
                 _write_color(target, pixel_color)
+                pbar.update(1)
     
     def __initialize(self) -> None:
         image_width = self.image_width
@@ -52,6 +60,16 @@ class Camera:
         self.__pixel_delta_u = pixel_delta_u
         self.__pixel_delta_v = pixel_delta_v
         self.__pixel00_loc = pixel00_loc
+    
+    def __get_ray(self, u:int, v:int) -> Ray:
+        offset = self.__sample_square()
+        pixel_sample = self.__pixel00_loc + (self.__pixel_delta_u * (u + offset.x)) + (self.__pixel_delta_v * (v + offset.y))
+        ray_origin = self.__center
+        ray_direction = pixel_sample - ray_origin
+        return Ray(ray_origin, ray_direction)
+        
+    def __sample_square(self) -> Vec3:
+        return Vec3(random.random() - 0.5, random.random() - 0.5, 0)
     
     def __ray_color(self, r:Ray, world:Hittable) -> Color:
         # Convert normal to color
