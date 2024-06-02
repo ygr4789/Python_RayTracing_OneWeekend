@@ -168,6 +168,12 @@ class Vec3:
                     _clamp(self.y, min_val, max_val),
                     _clamp(self.z, min_val, max_val))
     
+    def random(min: float = 0, max: float = 1) -> Vec3:
+        x = _random.uniform(min, max)
+        y = _random.uniform(min, max)
+        z = _random.uniform(min, max)
+        return Vec3(x, y, z)
+    
     def rand_unit_vector() -> Vec3:
         z1 = _random.uniform(0, 1)
         z2 = _random.uniform(0, 1)
